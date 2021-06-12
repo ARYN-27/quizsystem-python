@@ -3,7 +3,7 @@ from flask import Flask, render_template, request, url_for, flash, redirect
 from werkzeug.exceptions import abort
 
 
-def get_db_connection():
+def get_db_connection(): #DB Connection
     conn = sqlite3.connect('quizsystem_database.db')
     conn.row_factory = sqlite3.Row
     return conn
@@ -12,6 +12,15 @@ def get_post(admin_id):
     conn = get_db_connection()
     post = conn.execute('SELECT * FROM Admin WHERE admin_id = ?',
                         (admin_id,)).fetchone()
+    conn.close()
+    if post is None:
+        abort(404)
+    return post
+
+def get_post(lect_id):
+    conn = get_db_connection()
+    post = conn.execute('SELECT * FROM Lecturer WHERE lect_id = ?',
+                        (lect_id,)).fetchone()
     conn.close()
     if post is None:
         abort(404)
@@ -32,6 +41,8 @@ def post(post_id):
     post = get_post(post_id)
     return render_template('post.html', post=post)
 
+#ADMIN SEGMENT
+#Creating Admins
 @app.route('/admin_create', methods=('GET', 'POST'))
 def admin_create():
     if request.method == 'POST':
@@ -50,7 +61,8 @@ def admin_create():
             return redirect(url_for('index'))
     return render_template('admin_create.html')
 
-@app.route('/<int:admin_id>/admin_edit', methods=('GET', 'POST'))
+#Editing and Deleting Admin 
+@app.route('/<int:admin_id>/admin_edit', methods=('GET', 'POST')) #Editing
 def admin_edit(admin_id):
     post = get_post(admin_id)
 
@@ -72,11 +84,68 @@ def admin_edit(admin_id):
 
     return render_template('admin_edit.html', post=post)
 
-@app.route('/<int:admin_id>/delete', methods=('POST',))
-def delete(admin_id):
+@app.route('/<int:admin_id>/delete', methods=('POST',)) #Deleting 
+def admin_delete(admin_id):
     post = get_post(admin_id)
     conn = get_db_connection()
     conn.execute('DELETE FROM Admin WHERE admin_id = ?', (admin_id,))
+    conn.commit()
+    conn.close()
+    flash('"{}" was successfully deleted!'.format(post['title']))
+    return redirect(url_for('index'))
+
+#LECTURER SEGMENT
+#Creating Lecturer
+@app.route('/lecturer_create', methods=('GET', 'POST'))
+def lecturer_create():
+    if request.method == 'POST':
+        lect_id = request.form['lect_id']
+        lect_name = request.form['lect_name']
+        lect_email = request.form['lect_email']
+        lect_pwd = request.form['lect_pwd']
+        admin_id = request.form['admin_id']
+
+        if not lect_name:
+            flash('Name is required!')
+        else:
+            conn = get_db_connection()
+            conn.execute('INSERT INTO Lecturer (lect_id, lect_name, lect_email, lect_pwd, admin_id) VALUES (?, ?, ?, ?, ?)',
+                         (lect_id, lect_name, lect_email, lect_pwd, admin_id))
+            conn.commit()
+            conn.close()
+            return redirect(url_for('index'))
+    return render_template('lecturer_create.html')
+
+#Editing and Deleting Lecturer
+@app.route('/<int:lect_id>/lecturer_edit', methods=('GET', 'POST')) #Editing
+def lecturer_edit(lect_id):
+    post = get_post(lect_id)
+
+    if request.method == 'POST':
+        lect_id = request.form['lect_id']
+        lect_name = request.form['lect_name']
+        lect_email = request.form['lect_email']
+        lect_pwd = request.form['lect_pwd']
+        admin_id = request.form['admin_id']
+
+        if not lect_id:
+            flash('ID is required!')
+        else:
+            conn = get_db_connection()
+            conn.execute('UPDATE Lecturer SET lect_name = ?, lect_email = ?, lect_pwd = ?, admin_id = ?'
+                         ' WHERE lect_id = ?',
+                         (lect_name, lect_email, lect_pwd, admin_id, lect_id))
+            conn.commit()
+            conn.close()
+            return redirect(url_for('index'))
+
+    return render_template('lecturer_edit.html', post=post)
+
+@app.route('/<int:lect_id>/delete', methods=('POST',)) #Deleting 
+def lecturer_delete(lect_id):
+    post = get_post(lect_id)
+    conn = get_db_connection()
+    conn.execute('DELETE FROM Lecturer WHERE lect_id = ?', (lect_id,))
     conn.commit()
     conn.close()
     flash('"{}" was successfully deleted!'.format(post['title']))
