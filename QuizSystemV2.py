@@ -168,7 +168,6 @@ def student_create():
             conn = get_db_connection()
             conn.execute('INSERT INTO Student (student_id, student_name, student_email, student_pwd, admin_id) VALUES (?, ?, ?, ?, ?)',
                          (student_id, student_name, student_email, student_pwd, admin_id))
-            conn.commit()
             conn.close()
             return redirect(url_for('index'))
     return render_template('student_create.html')
@@ -196,7 +195,7 @@ def student_edit(student_id):
             conn.close()
             return redirect(url_for('index'))
 
-    return render_template('student_edit.html', post=post)
+    return render_template('student_edit.html', post=[post])
 
 @app.route('/<int:student_id>/student_delete', methods=('POST',)) #Deleting 
 def student_delete(student_id):
