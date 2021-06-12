@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} Student Registration Test {% endblock %}</h1>
+
+<form method="post">
+    <div class="form-group">
+        <label for="title">Student ID</label>
+        <input type="number" name="student_id"
+               placeholder="Student ID" class="form-control"
+               value="{{ request.form['student_id'] }}"></input>
+    </div>
+
+    <div class="form-group">
+        <label for="content">Student Name</label>
+        <textarea type="text" name="student_name" placeholder="Student Name"
+                  class="form-control">{{ request.form['student_name'] }}</textarea>
+    </div>
+
+    <div class="form-group">
+        <label for="content">Student Email</label>
+        <textarea type="text" name="student_email" placeholder="Student Email"
+                  class="form-control">{{ request.form['student_email'] }}</textarea>
+    </div>
+
+    <div class="form-group">
+        <label for="content">Student Password</label>
+        <textarea type="text" name="student_pwd" placeholder="Student Password"
+                  class="form-control">{{ request.form['student_pwd'] }}</textarea>
+    </div>
+
+    <div class="form-group">
+        <label for="content">Admin ID</label>
+        <textarea type="number" name="admin_id" placeholder="Admin ID"
+                  class="form-control">{{ request.form['admin_id'] }}</textarea>
+    </div>
+
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</form>
+{% endblock %}

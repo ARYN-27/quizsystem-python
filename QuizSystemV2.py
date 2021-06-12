@@ -150,3 +150,60 @@ def lecturer_delete(lect_id):
     conn.close()
     flash('"{}" was successfully deleted!'.format(post['lect_id']))
     return redirect(url_for('index'))
+
+#STUDENT SEGMENT
+#Creating Student
+@app.route('/student_create', methods=('GET', 'POST'))
+def student_create():
+    if request.method == 'POST':
+        student_id = request.form['student_id']
+        student_name = request.form['student_name']
+        student_email = request.form['student_email']
+        student_pwd = request.form['student_pwd']        
+        admin_id = request.form['admin_id']
+
+        if not student_name:
+            flash('Name is required!')
+        else:
+            conn = get_db_connection()
+            conn.execute('INSERT INTO Student (student_id, student_name, student_email, student_pwd, admin_id) VALUES (?, ?, ?, ?, ?)',
+                         (student_id, student_name, student_email, student_pwd, admin_id))
+            conn.commit()
+            conn.close()
+            return redirect(url_for('index'))
+    return render_template('student_create.html')
+
+#Editing and Deleting Student
+@app.route('/<int:student_id>/student_edit', methods=('GET', 'POST')) #Editing
+def student_edit(student_id):
+    post = get_post(student_id)
+
+    if request.method == 'POST':
+        student_id = request.form['student_id']
+        student_name = request.form['student_name']
+        student_email = request.form['student_email']
+        student_pwd = request.form['student_pwd']
+        admin_id = request.form['admin_id']
+
+        if not student_id:
+            flash('ID is required!')
+        else:
+            conn = get_db_connection()
+            conn.execute('UPDATE Student SET student_name = ?, student_email = ?, student_pwd = ?, admin_id = ?'
+                         ' WHERE student_id = ?',
+                         (student_name, student_email, student_pwd, admin_id, student_id))
+            conn.commit()
+            conn.close()
+            return redirect(url_for('index'))
+
+    return render_template('student_edit.html', post=post)
+
+@app.route('/<int:student_id>/student_delete', methods=('POST',)) #Deleting 
+def student_delete(student_id):
+    post = get_post(student_id)
+    conn = get_db_connection()
+    conn.execute('DELETE FROM Student WHERE student_id = ?', (student_id,))
+    conn.commit()
+    conn.close()
+    flash('"{}" was successfully deleted!'.format(post['student_id']))
+    return redirect(url_for('index'))
