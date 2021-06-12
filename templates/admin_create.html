@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} Admin Registration Test {% endblock %}</h1>
+
+<form method="post">
+    <div class="form-group">
+        <label for="title">Admin ID</label>
+        <input type="number" name="admin_id"
+               placeholder="Admin ID" class="form-control"
+               value="{{ request.form['admin_id'] }}"></input>
+    </div>
+
+    <div class="form-group">
+        <label for="content">Admin Name</label>
+        <textarea type="text" name="admin_name" placeholder="Admin Name"
+                  class="form-control">{{ request.form['admin_name'] }}</textarea>
+    </div>
+
+    <div class="form-group">
+        <label for="content">Admin Password</label>
+        <textarea name="admin_pwd" placeholder="Admin Password"
+                  class="form-control">{{ request.form['admin_pwd'] }}</textarea>
+    </div>
+
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</form>
+{% endblock %}
