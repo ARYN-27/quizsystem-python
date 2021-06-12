@@ -91,7 +91,7 @@ def admin_delete(admin_id):
     conn.execute('DELETE FROM Admin WHERE admin_id = ?', (admin_id,))
     conn.commit()
     conn.close()
-    flash('"{}" was successfully deleted!'.format(post['title']))
+    flash('"{}" was successfully deleted!'.format(post['admin_id']))
     return redirect(url_for('index'))
 
 #LECTURER SEGMENT
@@ -141,12 +141,12 @@ def lecturer_edit(lect_id):
 
     return render_template('lecturer_edit.html', post=post)
 
-@app.route('/<int:lect_id>/delete', methods=('POST',)) #Deleting 
+@app.route('/<int:lect_id>/lecturer_delete', methods=('POST',)) #Deleting 
 def lecturer_delete(lect_id):
     post = get_post(lect_id)
     conn = get_db_connection()
     conn.execute('DELETE FROM Lecturer WHERE lect_id = ?', (lect_id,))
     conn.commit()
     conn.close()
-    flash('"{}" was successfully deleted!'.format(post['title']))
+    flash('"{}" was successfully deleted!'.format(post['lect_id']))
     return redirect(url_for('index'))
