@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} Welcome Lecturer {% endblock %}</h1>
+
+<h2>Select Your Action</h2>
+
+    <div>
+        <button class="btn btn-primary btn-lg" type="submit" onClick="location.href='{{url_for('admin_create')}}'">Creating Admin Account</button>
+        <button class="btn btn-primary btn-lg" type="submit" onClick="location.href='{{url_for('lecturer_create')}}'">Creating Lecturer Account</button>
+        <button class="btn btn-primary btn-lg" type="submit" onClick="location.href='{{url_for('student_create')}}'">Creating Student Account</button>
+    </div>  
+
+{% endblock %}

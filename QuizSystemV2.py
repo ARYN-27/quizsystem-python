@@ -27,7 +27,7 @@ def get_post(lect_id):
     return post
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'gmqk7a6m1hm65ogf7rw'
+app.config['SECRET_KEY'] = 'gmqk7a6m1hm65ogf7rw' 
 
 @app.route('/')
 def index():
@@ -35,6 +35,33 @@ def index():
     posts = conn.execute('SELECT * FROM Admin').fetchall()
     conn.close()
     return render_template('index.html', posts=posts)
+
+@app.route('/login') #Login Page Test 
+def retrieveUsers():
+	con = get_db_connection()
+	cur = con.cursor()
+	cur.execute("SELECT admin_id, admin_pwd FROM Admin")
+	users = cur.fetchall()
+	con.close()
+	return users
+
+@app.route('/admin_landing') #Admin Landing Page
+def admin_landing():
+    conn = get_db_connection()
+    conn.close()
+    return render_template('admin_landing.html')
+
+@app.route('/lecturer_landing') #Lecturer Landing Page
+def lecturer_landing():
+    conn = get_db_connection()
+    conn.close()
+    return render_template('lecturer_landing.html')
+
+@app.route('/student_landing') #Student Landing Page
+def student_landing():
+    conn = get_db_connection()
+    conn.close()
+    return render_template('student_landing.html')
 
 @app.route('/<int:post_id>')
 def post(post_id):
