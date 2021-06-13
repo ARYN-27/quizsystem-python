@@ -1,7 +1,7 @@
 import sqlite3
 from flask import Flask, render_template, request, url_for, flash, redirect
 from werkzeug.exceptions import abort
-
+import login as dbHandler
 
 def get_db_connection(): #DB Connection
     conn = sqlite3.connect('quizsystem_database.db')
@@ -26,8 +26,31 @@ def get_post(lect_id):
         abort(404)
     return post
 
+def get_post(student_id):
+    conn = get_db_connection()
+    post = conn.execute('SELECT * FROM Student WHERE student_id = ?',
+                        (student_id,)).fetchone()
+    conn.close()
+    if post is None:
+        abort(404)
+    return post
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'gmqk7a6m1hm65ogf7rw' 
+
+@app.route('/login', methods=['POST', 'GET']) #Login Test
+def login():
+    if request.method=='POST':
+           username = request.form['username']
+           password = request.form['password']
+           dbHandler.insertUser(username, password)
+           users = dbHandler.retrieveUsers()
+           return render_template('login.html', users=users)
+    else:
+        return render_template('login.html')
+ 
+if __name__ == '__main__':
+    app.run(debug=False, host='0.0.0.0')
 
 @app.route('/')
 def index():
@@ -36,14 +59,6 @@ def index():
     conn.close()
     return render_template('index.html', posts=posts)
 
-@app.route('/login') #Login Page Test 
-def retrieveUsers():
-	con = get_db_connection()
-	cur = con.cursor()
-	cur.execute("SELECT admin_id, admin_pwd FROM Admin")
-	users = cur.fetchall()
-	con.close()
-	return users
 
 @app.route('/admin_landing') #Admin Landing Page
 def admin_landing():
