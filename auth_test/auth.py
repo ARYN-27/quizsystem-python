@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
-#from werkzeug.security import generate_password_hash, check_password_hash #Hashing Elements
-from flask_login import login_user
+from werkzeug.security import generate_password_hash, check_password_hash #Hashing Elements
+from flask_login import login_user, logout_user, login_required
 from .models import User
 from . import db
 
@@ -13,8 +13,8 @@ def login():
 @auth.route('/login', methods=['POST'])
 def login_post():
     email = request.form.get('email')
-    #password = request.form.get('password')
-    #remember = True if request.form.get('remember') else False
+    password = request.form.get('password')
+    remember = True if request.form.get('remember') else False
 
     user = User.query.filter_by(email=email).first()
 
@@ -45,7 +45,8 @@ def signup_post():
         return redirect(url_for('auth.signup'))
 
     # create a new user with the form data. # Hash the password so the plaintext version isn't saved. 
-    # Hashing isn't added yet [password=generate_password_hash(password, method='sha256')]
+    # Hashing isn't added yet 
+    password=generate_password_hash(password, method='sha256')
     new_user = User(email=email, name=name)
 
     # add the new user to the database
@@ -57,5 +58,6 @@ def signup_post():
 
 @auth.route('/logout')
 def logout():
-    return 'Logout'
+    logout_user()
+    return redirect(url_for('main.index'))
 
