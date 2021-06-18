@@ -2,6 +2,14 @@
 
 {% block content %}
 <h1>{% block title %} Login Test {% endblock %}</h1>
+<div class="box"></div>
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<div class="notification is-danger">
+    {{ messages[0] }}
+</div>
+{% endif %}
+{% endwith %}
 <form>
     <div class="form-group">
         <label for="admin_id">Admin ID</label>
@@ -12,6 +20,22 @@
         <input type="password" class="form-control" id="admin_pwd" placeholder="Password">
         <small id="passwordHelp" class="form-text text-muted">We'll never share your password with anyone else.</small>
     </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
+    
+    <label class="my-1 mr-2" for="inlineFormCustomSelectPref">Select Your Role</label>
+    <select class="custom-select my-1 mr-sm-2" id="inlineFormCustomSelectPref" placeholder="Select Your Role">
+        <option for="admin_id" value="1">Admin</option>
+        <option for="lect_id"value="2">Lecturer</option>
+        <option for="student_id"value="3">Student</option>
+    </select>
+
+    <div class="field">
+        <label class="checkbox">
+            <input type="checkbox">
+            Remember me
+        </label>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Login</button>
 </form>
+</div>
 {% endblock %}
