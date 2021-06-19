@@ -23,9 +23,9 @@
     
     <label class="my-1 mr-2" for="inlineFormCustomSelectPref">Select Your Role</label>
     <select class="custom-select my-1 mr-sm-2" id="inlineFormCustomSelectPref" placeholder="Select Your Role">
-        <option for="admin_id" value="1">Admin</option>
-        <option for="lect_id"value="2">Lecturer</option>
-        <option for="student_id"value="3">Student</option>
+        <option for="admin_id" value="1" href="{{url_for('admin_landing')}}">Admin</option>
+        <option for="lect_id"value="2" href="{{url_for('lecturer_landing')}}">Lecturer</option>
+        <option for="student_id"value="3" href="{{url_for('student_landing')}}">Student</option>
     </select>
 
     <div class="field">

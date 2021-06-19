@@ -2,7 +2,7 @@ import sqlite3
 from flask import Flask, render_template, request, url_for, flash, redirect
 #from flask_user import current_user, login_required, roles_required, UserManager, UserMixin
 from werkzeug.exceptions import abort
-#import login as dbHandler
+import login as dbHandler
 
 def get_db_connection(): #DB Connection
     conn = sqlite3.connect('quizsystem_database.db')
@@ -42,8 +42,8 @@ app.config['SECRET_KEY'] = 'gmqk7a6m1hm65ogf7rw'
 @app.route('/login', methods=['POST', 'GET']) #Login Test
 def login():
     if request.method=='POST':
-           username = request.form['admin_id','lect_id','student_id']
-           password = request.form['admin_pwd','lect_pwd','student_pwd']
+           username = request.form['admin_id']
+           password = request.form['admin_pwd']
            dbHandler.insertUser(username, password)
            users = dbHandler.retrieveUsers()
            return render_template('login.html', users=users)
