@@ -10,7 +10,8 @@ DROP TABLE IF EXISTS Quiz_Obj;
 CREATE TABLE Admin(
     admin_id INTEGER PRIMARY KEY NOT NULL,
     admin_name TEXT(30) NOT NULL,
-    admin_pwd TEXT(20) NOT NULL
+    admin_pwd TEXT(20) NOT NULL,
+    role TEXT(20) NOT NULL DEFAULT 'admin'
 );
 
 CREATE TABLE Lecturer(
@@ -19,6 +20,7 @@ CREATE TABLE Lecturer(
     lect_email TEXT(20),
     lect_pwd TEXT(20) NOT NULL,
     lecturer_modify_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    role TEXT(20) NOT NULL DEFAULT 'lecturer',
     admin_id INTEGER NOT NULL,
     FOREIGN KEY(admin_id) REFERENCES Admin(admin_id)
 );
@@ -28,6 +30,7 @@ CREATE TABLE Student(
     student_email TEXT(20),
     student_pwd TEXT(20) NOT NULL,
     student_modify_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    role TEXT(20) NOT NULL DEFAULT 'student',
     admin_id INTEGER NOT NULL,
     FOREIGN KEY(admin_id) REFERENCES Admin(admin_id)
 );

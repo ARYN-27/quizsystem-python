@@ -1,3 +1,4 @@
+from app.models import requires_roles
 import sqlite3
 from flask import Flask, render_template, request, url_for, flash, redirect
 #from flask_user import current_user, login_required, roles_required, UserManager, UserMixin
@@ -62,6 +63,7 @@ def index():
 
 
 @app.route('/admin_landing') #Admin Landing Page
+@requires_roles('admin')
 def admin_landing():
     conn = get_db_connection()
     conn.close()

@@ -48,6 +48,13 @@
         </li>
       </ul>
     </div>
+    <div>
+      {% if current_user.is_authenticated %}
+      <a href="{{ url_for('logout') }}">Log Out</a>
+      {%else%}
+      <a href="{{ url_for('signin') }}">SignIn</a>
+      {%endif%}
+  </div>
   </nav>
   <div class="container">
     {% for message in get_flashed_messages() %}

@@ -1,3 +1,4 @@
 {
-    "python.pythonPath": "dev-env/bin/python"
+    "python.pythonPath": "dev-env/bin/python",
+    "git.ignoreLimitWarning": true
 }
