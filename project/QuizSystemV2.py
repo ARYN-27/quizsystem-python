@@ -1,14 +1,17 @@
-from app.models import requires_roles
 import sqlite3
-from flask import Flask, render_template, request, url_for, flash, redirect
+from models import Admin, Student, Lecturer
+from flask import Blueprint, render_template, redirect, url_for, request, flash
 #from flask_user import current_user, login_required, roles_required, UserManager, UserMixin
-from werkzeug.exceptions import abort
-import login as dbHandler
+from werkzeug.security import generate_password_hash, check_password_hash, abort
+from . import db
 
 def get_db_connection(): #DB Connection
     conn = sqlite3.connect('quizsystem_database.db')
     conn.row_factory = sqlite3.Row
     return conn
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'gmqk7a6m1hm65ogf7rw' 
 
 def get_post(admin_id):
     conn = get_db_connection()
@@ -37,33 +40,38 @@ def get_post(student_id):
         abort(404)
     return post
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'gmqk7a6m1hm65ogf7rw' 
+auth = Blueprint('auth', __name__)
 
-@app.route('/login', methods=['POST', 'GET']) #Login Test
-def login():
-    if request.method=='POST':
-           username = request.form['admin_id']
-           password = request.form['admin_pwd']
-           dbHandler.insertUser(username, password)
-           users = dbHandler.retrieveUsers()
-           return render_template('login.html', users=users)
-    else:
-        return render_template('login.html')
- 
-if __name__ == '__main__':
-    app.run(debug=False, host='0.0.0.0')
+@auth.route('/login', methods=['POST'])
+def login_post():
+    admin_id = request.form.get('admin_id')
+    admin_pwd = request.form.get('admin_pwd')
+    remember = True if request.form.get('remember') else False
+
+    admin = Admin.query.filter_by(admin_id=admin_id).first()
+
+    # check if the user actually exists
+    # take the user-supplied password, hash it, and compare it to the hashed password in the database
+    if not admin or not check_password_hash(admin.password, admin_pwd):
+        flash('Please check your login details and try again.')
+        return redirect(url_for('auth.login')) # if the user doesn't exist or password is wrong, reload the page
+
+    # if the above check passes, then we know the user has the right credentials
+    return redirect(url_for('main.profile'))
+
+@auth.route('/logout')
+def logout():
+    return 'Logout'
 
 @app.route('/')
 def index():
     conn = get_db_connection()
-    posts = conn.execute('SELECT * FROM Admin').fetchall()
     conn.close()
     return render_template('index.html', posts=posts)
 
 
 @app.route('/admin_landing') #Admin Landing Page
-@requires_roles('admin')
+#@requires_roles('admin')
 def admin_landing():
     conn = get_db_connection()
     conn.close()
@@ -251,3 +259,4 @@ def student_delete(student_id):
     conn.close()
     flash('"{}" was successfully deleted!'.format(post['student_id']))
     return redirect(url_for('index'))
+

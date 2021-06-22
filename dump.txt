@@ -1,0 +1,70 @@
+└── flask_auth_app
+    └── project
+        ├── __init__.py       # setup our app
+        ├── auth.py           # the auth routes for our app
+        ├── db.sqlite         # our database
+        ├── main.py           # the non-auth routes for our app
+        ├── models.py         # our user model
+        └── templates
+            ├── base.html     # contains common layout and links
+            ├── index.html    # show the home page
+            ├── login.html    # show the login form
+            ├── profile.html  # show the profile page
+            └── signup.html   # show the signup form
+
+
+        id = db.Column(db.Integer(), primary_key=True)
+        user_id = db.Column(db.Integer(), db.ForeignKey('users.id', ondelete='CASCADE'))
+        role_id = db.Column(db.Integer(), db.ForeignKey('roles.id', ondelete='CASCADE'))
+
+
+@login.admin_loader
+def load_admin(admin_id):
+    admin_id = Admin.query.filter_by(admin_id=admin_id).first()
+    return admin_id
+
+@login.student_loader
+def load_student(student_id):
+    student_id = Student.query.filter_by(student_id=student_id).first()
+    return student_id
+
+@login.lecturer_loader
+def load_lecturer(lect_id):
+    lect_id = Lecturer.query.filter_by(lect_id=lect_id).first()
+    return lect_id
+
+class Student(db.Model):
+    student_id = db.Column(db.Integer, primary_key=True) # primary keys are required by SQLAlchemy
+    student_name = db.Column(db.String(30))
+    student_pwd = db.Column(db.String(20))
+    student_email = db.Column(db.String(30))
+    student_role = db.Column(db.String(64), default='student')
+    student_modify_date = db.Column(db.DateTime)
+    admin_id = db.Column(db.Integer, ForeignKey=("Admin.admin_id", onupdate="CASCADE", ondelete="CASCADE"))
+
+class Lecturer(db.Model):
+    lect_id = db.Column(db.Integer, primary_key=True) # primary keys are required by SQLAlchemy
+    lect_name = db.Column(db.String(30))
+    lect_pwd = db.Column(db.String(20))
+    lect_email = db.Column(db.String(30))
+    lect_role = db.Column(db.String(64), default='lecturer')
+    lecturer_modify_date = db.Column(db.DateTime)
+    admin_id = db.Column(db.Integer, ForeignKey=("Admin.admin_id", onupdate="CASCADE", ondelete="CASCADE"))
+
+
+<li class="nav-item">
+          <a class="nav-link" href="{{url_for('main.index')}}">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{url_for('main.profile')}}">Profile</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{url_for('auth.login')}}">Login</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{url_for('auth.logout')}}">Log Out</a>
+        </li>
+
+
+>>> from project import db, create_app, models
+>>> db.create_all(app=create_app())
