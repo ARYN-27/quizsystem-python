@@ -1,13 +1,14 @@
 import sqlite3
 import flask
-from flask_login import current_user, login_required, login_user, logout_user
-from app.models import Admin, Student, Lecturer
 from flask import Blueprint, render_template, redirect, url_for, request, flash
-from app.forms import LoginForm
-from flask_user import current_user, login_required, roles_required, UserManager, UserMixin
+from flask_login import current_user, login_required, login_user, logout_user
+from app.forms import LoginForm, RegistrationForm
+from app.models import User, requires_roles
+#from flask_user import current_user, login_required, roles_required, UserManager, UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 #from werkzeug.security import generate_password_hash, check_password_hash, abort
 from . import app, db
+
 
 def get_db_connection(): #DB Connection
     conn = sqlite3.connect('quizsystem_database.db')
@@ -15,7 +16,13 @@ def get_db_connection(): #DB Connection
     return conn
 
 #app = flask(__name__)
-#app.config['SECRET_KEY'] = 'gmqk7a6m1hm65ogf7rw' 
+app.config['SECRET_KEY'] = 'gmqk7a6m1hm65ogf7rw' 
+
+@app.route('/')
+def index():
+    conn = get_db_connection()
+    conn.close()
+    return render_template('index.html')
 
 def get_post(admin_id):
     conn = get_db_connection()
@@ -46,39 +53,11 @@ def get_post(student_id):
 
 auth = Blueprint('auth', __name__)
 
-@app.route('/signin', methods=['GET', 'POST'])
-def signin():
-    if current_user.is_authenticated:
-        return redirect(url_for('admin'))
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = Admin.query.filter_by(admin_id=form.admin_id.data).first()
-        if user is None:
-            flash('Invalid username')
-            return redirect(url_for('signin'))
-        login_user(user, remember=form.remember_me.data)
-        return redirect(url_for('admin'))
-    return render_template('signin.html', title='Sign In', form=form)
 
-@app.route('/admin')
-@login_required
-#@requires_roles('admin')
-def admin():
-    return render_template('userprofile.html', title="Admin Profile")
-
-@auth.route('/logout')
-def logout():
-    return 'Logout'
-
-@app.route('/')
-def index():
-    conn = get_db_connection()
-    conn.close()
-    return render_template('index.html')
 
 
 @app.route('/admin_landing') #Admin Landing Page
-#@requires_roles('admin')
+@requires_roles('admin')
 def admin_landing():
     conn = get_db_connection()
     conn.close()
@@ -104,6 +83,7 @@ def post(post_id):
 #ADMIN SEGMENT
 #Creating Admins
 @app.route('/admin_create', methods=('GET', 'POST'))
+@requires_roles('admin')
 def admin_create():
     if request.method == 'POST':
         admin_id = request.form['admin_id']
@@ -118,11 +98,12 @@ def admin_create():
                          (admin_id, admin_name, admin_pwd))
             conn.commit()
             conn.close()
-            return redirect(url_for('index'))
+            return redirect(url_for('auth-test'))
     return render_template('admin_create.html')
 
 #Editing and Deleting Admin 
 @app.route('/<int:admin_id>/admin_edit', methods=('GET', 'POST')) #Editing
+@requires_roles('admin')
 def admin_edit(admin_id):
     post = get_post(admin_id)
 
@@ -144,7 +125,8 @@ def admin_edit(admin_id):
 
     return render_template('admin_edit.html', post=post)
 
-@app.route('/<int:admin_id>/delete', methods=('POST',)) #Deleting 
+@app.route('/<int:admin_id>/delete', methods=('POST',)) #Deleting
+@requires_roles('admin') 
 def admin_delete(admin_id):
     post = get_post(admin_id)
     conn = get_db_connection()
@@ -267,3 +249,58 @@ def student_delete(student_id):
     flash('"{}" was successfully deleted!'.format(post['student_id']))
     return redirect(url_for('index'))
 
+##AUTH TEST 
+##----------------------------------------------------------------------------------------------------------------------------------------
+@app.route('/signin', methods=['GET', 'POST'])
+def signin():
+    if current_user.is_authenticated:
+        return redirect(url_for('customer'))
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(name=form.name.data).first()
+        if user is None:
+            flash('Invalid username')
+            return redirect(url_for('signin'))
+        login_user(user, remember=form.remember_me.data)
+        return redirect(url_for('customer'))
+    return render_template('signin.html', title='Sign In', form=form)
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('customer'))
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        name = form.name.data
+        email = form.email.data
+        password = form.password.data
+        role = form.role.data
+        user = User(name=name, email=email, password=password, role=role);
+        db.session.add(user)
+        db.session.commit()
+        flash('Congratulations, you are now a registered user!')
+        return redirect(url_for('signin'))
+    return render_template('registration.html', title='Register', form=form)
+
+
+@app.route('/customer')
+@login_required
+@requires_roles('admin', 'customer')
+def customer():
+    return render_template('userprofile.html', title="User Profile")
+
+
+@app.route('/admin')
+@login_required
+@requires_roles('admin')
+def admin():
+    return render_template('userprofile.html', title="Admin Profile")
+
+
+@app.route('/logout')
+@login_required
+@requires_roles('admin','customer')
+def logout():
+    logout_user()
+    return redirect(url_for('signin'))
