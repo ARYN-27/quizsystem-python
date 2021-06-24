@@ -20,8 +20,8 @@ app.config['SECRET_KEY'] = 'gmqk7a6m1hm65ogf7rw'
 
 @app.route('/')
 def index():
-    conn = get_db_connection()
-    conn.close()
+    #conn = get_db_connection()
+    #conn.close()
     return render_template('index.html')
 
 def get_post(admin_id):
@@ -254,7 +254,7 @@ def student_delete(student_id):
 @app.route('/signin', methods=['GET', 'POST'])
 def signin():
     if current_user.is_authenticated:
-        return redirect(url_for('customer'))
+        return redirect(url_for('index'))
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(name=form.name.data).first()
@@ -262,14 +262,14 @@ def signin():
             flash('Invalid username')
             return redirect(url_for('signin'))
         login_user(user, remember=form.remember_me.data)
-        return redirect(url_for('customer'))
+        return redirect(url_for('index'))
     return render_template('signin.html', title='Sign In', form=form)
 
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for('customer'))
+        return redirect(url_for('index'))
     form = RegistrationForm()
     if form.validate_on_submit():
         name = form.name.data
@@ -284,23 +284,29 @@ def register():
     return render_template('registration.html', title='Register', form=form)
 
 
-@app.route('/customer')
+@app.route('/student_profile')
 @login_required
-@requires_roles('admin', 'customer')
-def customer():
-    return render_template('userprofile.html', title="User Profile")
+@requires_roles('admin', 'student')
+def student_profile():
+    return render_template('userprofile.html', title="Student Profile")
+
+@app.route('/lecturer_profile')
+@login_required
+@requires_roles('admin', 'lecturer')
+def lecturer_profile():
+    return render_template('userprofile.html', title="Lecturer Profile")
 
 
-@app.route('/admin')
+@app.route('/admin_profile')
 @login_required
 @requires_roles('admin')
-def admin():
+def admin_profile():
     return render_template('userprofile.html', title="Admin Profile")
 
 
 @app.route('/logout')
 @login_required
-@requires_roles('admin','customer')
+@requires_roles('admin','student','lecturer')
 def logout():
     logout_user()
     return redirect(url_for('signin'))
