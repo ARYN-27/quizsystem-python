@@ -1,17 +1,21 @@
 import sqlite3
-from models import Admin, Student, Lecturer
+import flask
+from flask_login import current_user, login_required, login_user, logout_user
+from app.models import Admin, Student, Lecturer
 from flask import Blueprint, render_template, redirect, url_for, request, flash
-#from flask_user import current_user, login_required, roles_required, UserManager, UserMixin
-from werkzeug.security import generate_password_hash, check_password_hash, abort
-from . import db
+from app.forms import LoginForm
+from flask_user import current_user, login_required, roles_required, UserManager, UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
+#from werkzeug.security import generate_password_hash, check_password_hash, abort
+from . import app, db
 
 def get_db_connection(): #DB Connection
     conn = sqlite3.connect('quizsystem_database.db')
     conn.row_factory = sqlite3.Row
     return conn
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'gmqk7a6m1hm65ogf7rw' 
+#app = flask(__name__)
+#app.config['SECRET_KEY'] = 'gmqk7a6m1hm65ogf7rw' 
 
 def get_post(admin_id):
     conn = get_db_connection()

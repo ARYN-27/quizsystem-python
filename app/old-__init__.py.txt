@@ -1,8 +1,14 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
+
 
 # init SQLAlchemy so we can use it later in our models
+app = Flask(__name__)
 db = SQLAlchemy()
+login = LoginManager(app)
+
+from app import models
 
 def create_app():
     app = Flask(__name__)
