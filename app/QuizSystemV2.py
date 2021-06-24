@@ -46,22 +46,25 @@ def get_post(student_id):
 
 auth = Blueprint('auth', __name__)
 
-@auth.route('/login', methods=['POST'])
-def login_post():
-    admin_id = request.form.get('admin_id')
-    admin_pwd = request.form.get('admin_pwd')
-    remember = True if request.form.get('remember') else False
+@app.route('/signin', methods=['GET', 'POST'])
+def signin():
+    if current_user.is_authenticated:
+        return redirect(url_for('admin'))
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = Admin.query.filter_by(admin_id=form.admin_id.data).first()
+        if user is None:
+            flash('Invalid username')
+            return redirect(url_for('signin'))
+        login_user(user, remember=form.remember_me.data)
+        return redirect(url_for('admin'))
+    return render_template('signin.html', title='Sign In', form=form)
 
-    admin = Admin.query.filter_by(admin_id=admin_id).first()
-
-    # check if the user actually exists
-    # take the user-supplied password, hash it, and compare it to the hashed password in the database
-    if not admin or not check_password_hash(admin.password, admin_pwd):
-        flash('Please check your login details and try again.')
-        return redirect(url_for('auth.login')) # if the user doesn't exist or password is wrong, reload the page
-
-    # if the above check passes, then we know the user has the right credentials
-    return redirect(url_for('main.profile'))
+@app.route('/admin')
+@login_required
+#@requires_roles('admin')
+def admin():
+    return render_template('userprofile.html', title="Admin Profile")
 
 @auth.route('/logout')
 def logout():
@@ -71,7 +74,7 @@ def logout():
 def index():
     conn = get_db_connection()
     conn.close()
-    return render_template('index.html', posts=posts)
+    return render_template('index.html')
 
 
 @app.route('/admin_landing') #Admin Landing Page
